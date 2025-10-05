@@ -23,18 +23,28 @@ def render(user):
             st.warning("⚠️ No users or cases found in the database.")
             return
 
-        # Select target user and case
+        # --- Prepare users and cases lists with placeholder ---
+        users_options = [{"id": None, "name": "👉 Please choose a partner", "email": ""}] + users_res.data
+        cases_options = [{"id": None, "title": "👉 Please choose a case"}] + cases_res.data
+
+        # --- Select partner ---
         to_user = st.selectbox(
             "Select partner to give feedback to:",
-            options=users_res.data,
-            format_func=lambda u: f"{u['name']} ({u['email']})"
+            options=users_options,
+            format_func=lambda u: f"{u['name']} ({u['email']})" if u["id"] else u["name"],
         )
 
+        # --- Select case ---
         case = st.selectbox(
             "Select case practiced:",
-            options=cases_res.data,
-            format_func=lambda c: c["title"]
+            options=cases_options,
+            format_func=lambda c: c["title"],
         )
+
+        # --- Optional validation before proceeding ---
+        if not to_user["id"] or not case["id"]:
+            st.warning("⚠️ Please select both a partner and a case before submitting feedback.")
+            st.stop()
 
         # Skill ratings
         st.write("### Rate the skills (1–5)")

@@ -24,7 +24,7 @@ else:
 
     if st.sidebar.button("🔄 Refresh Data"):
         st.cache_data.clear()
-        st.sidebar.success("Cache cleared! Data will reload next time.")
+        st.sidebar.success("Data was updated.")
 
     tabs = st.tabs([
         "📊 Analytics",
