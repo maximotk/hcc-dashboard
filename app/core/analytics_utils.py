@@ -32,7 +32,7 @@ def feedback_to_dataframe(feedback_data: list):
 def compute_skill_averages(feedback_df: pd.DataFrame):
     """Compute per-skill averages from a feedback dataframe."""
     if feedback_df.empty:
-        return {}
+        return {}, []
 
     # Detect skill columns dynamically
     skill_cols = [c for c in feedback_df.columns if c not in ["Date", "case_id", "Case"]]
