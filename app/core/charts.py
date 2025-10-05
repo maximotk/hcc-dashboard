@@ -27,7 +27,7 @@ def radar_chart(skill_avgs: dict):
     return fig
 
 
-def performance_line_chart(df: pd.DataFrame, skill_cols: list, mode: str = "Time (by Date)"):
+def performance_line_chart(df: pd.DataFrame, skill_cols: list, mode: str = "Number of Cases Practiced"):
     """Line chart showing performance evolution by date or case index."""
     # Defensive copy
     df = df.copy()

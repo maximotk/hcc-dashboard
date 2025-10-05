@@ -43,7 +43,7 @@ def render(user):
     with col2:
         mode = st.radio(
             "View Progress Over:",
-            ["Time (by Date)", "Number of Cases Practiced"],
+            ["Number of Cases Practiced", "Time (by Date)"],
             horizontal=True,
         )
         st.plotly_chart(
