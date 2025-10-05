@@ -1,6 +1,7 @@
 from app.core.db import supabase
 import pandas as pd
 from app.core.analytics_utils import get_user_feedback, feedback_to_dataframe, compute_skill_averages
+import streamlit as st
 
 @st.cache_data(ttl=600)
 def get_all_cases():

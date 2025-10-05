@@ -1,6 +1,7 @@
 
 from app.core.db import supabase
 import pandas as pd
+import streamlit as st
 
 @st.cache_data(ttl=600)
 def get_user_feedback(user_id: str, status: str = "accepted"):

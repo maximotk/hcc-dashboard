@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 from app.core.auth import check_session, login_ui, logout_button
 from app.tabs import (

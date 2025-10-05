@@ -4,6 +4,7 @@ from app.core.db import supabase
 from app.core.analytics_utils import get_user_skill_avgs
 import pandas as pd
 import numpy as np
+import streamlit as st
 
 @st.cache_data(ttl=600)
 def get_all_users(exclude_user_id=None):
