@@ -1,0 +1,11 @@
+[theme]
+base = "dark"  # or "light"
+
+[server]
+headless = true
+
+[client]
+showSidebarNavigation = false
+
+[ui]
+hideTopBar = true
