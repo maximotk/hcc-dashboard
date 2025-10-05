@@ -9,6 +9,11 @@ from app.tabs import (
 
 st.set_page_config(page_title="HEC Case Club", page_icon="🎓", layout="wide")
 
+st.sidebar.write("## ⚙️ Settings")
+if st.sidebar.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.sidebar.success("Cache cleared! Data will reload next time.")
+
 user = check_session()
 
 if not user:
