@@ -1,5 +1,3 @@
-# app/tabs/tab2_case_recommendations.py
-
 import streamlit as st
 import pandas as pd
 from app.core.analytics_utils import get_user_skill_avgs
