@@ -53,7 +53,6 @@ def render(user):
         )
         rec_mode_key = "similar" if rec_mode == "Similar to Yourself" else "complement"
 
-        st.write("⏳ Computing recommendations...")
         recs = recommend_partners(user.id, mode=rec_mode_key)
 
         if not recs:
