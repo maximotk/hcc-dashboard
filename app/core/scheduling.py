@@ -38,11 +38,19 @@ def add_slots(user_id: str, starts_local: List[datetime], tz_str: str):
     rows = []
     for dt in starts_local:
         start_utc = _to_utc(dt, tz_str)
-        end_utc = start_utc + timedelta(minutes=SLOT_MINUTES)
-        rows.append({"user_id": user_id, "start_ts": start_utc.isoformat(), "end_ts": end_utc.isoformat()})
-    if rows:
+        rows.append({"start_ts": start_utc.isoformat()})  # ⟵ only start_ts
+
+    if not rows:
+        st.info("Select at least one date and time.")
+        return
+
+    try:
         supabase.table("availability_slots").insert(rows).execute()
-        st.cache_data.clear()  # invalidate listings
+    except Exception as e:
+        st.error(f"Failed to add slots. {type(e).__name__}: {getattr(e, 'args', [''])[0]}")
+        raise
+    finally:
+        st.cache_data.clear()
 
 def delete_slot(slot_id: str, user_id: str):
     supabase.table("availability_slots").delete().eq("id", slot_id).eq("user_id", user_id).execute()
