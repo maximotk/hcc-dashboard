@@ -44,24 +44,24 @@ def render(user):
         # --- Optional validation before proceeding ---
         if not to_user["id"] or not case["id"]:
             st.warning("⚠️ Please select both a partner and a case before submitting feedback.")
-            st.stop()
+        else:
+            # Skill ratings
+            st.write("### Rate the skills (1–5)")
+            skills = ["Estimation", "Framework", "Brainstorming", "Chart Interpretation", "Numerical Calculations"]
+            skill_scores = {skill: st.slider(skill, 1, 5, 3) for skill in skills}
 
-        # Skill ratings
-        st.write("### Rate the skills (1–5)")
-        skills = ["Estimation", "Framework", "Brainstorming", "Chart Interpretation", "Numerical Calculations"]
-        skill_scores = {skill: st.slider(skill, 1, 5, 3) for skill in skills}
+            comments = st.text_area("Comments (optional)")
 
-        comments = st.text_area("Comments (optional)")
+            if st.button("Submit Feedback"):
+                insert_feedback(
+                    from_user=user.id,
+                    to_user=to_user["id"],
+                    case_id=case["id"],
+                    skill_scores=skill_scores,
+                    comments=comments
+                )
+                st.success("✅ Feedback submitted! Pending approval from your partner.")
 
-        if st.button("Submit Feedback"):
-            insert_feedback(
-                from_user=user.id,
-                to_user=to_user["id"],
-                case_id=case["id"],
-                skill_scores=skill_scores,
-                comments=comments
-            )
-            st.success("✅ Feedback submitted! Pending approval from your partner.")
 
     # --- TAB 2: REVIEW RECEIVED FEEDBACK ---
     with tab2:

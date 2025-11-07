@@ -17,7 +17,7 @@ def render(user):
     # 1️⃣ EXPLORE USERS
     # ---------------------------------------------------------------------
     if mode == "🧭 Explore Users":
-        st.subheader("🔍 Explore Users by Language")
+        st.subheader("🔍 Explore Users")
 
         users = get_all_users(exclude_user_id=user.id)
         if not users:
@@ -123,5 +123,4 @@ def render(user):
                     st.markdown(f"📧 [Email {title_name}](mailto:{email}?subject=Case%20practice%20partner)")
                 if u.get("linkedin_url"):
                     st.link_button("LinkedIn", u["linkedin_url"])
-                st.caption(f"🏆 Match score: {round(u.get('score', 0), 3)}")
 
