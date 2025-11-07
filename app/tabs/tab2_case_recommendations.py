@@ -30,14 +30,17 @@ def render(user):
         df = pd.DataFrame(cases)
 
         # --- Filters ---
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
+
         difficulties = ["All"] + sorted(df["difficulty"].dropna().unique().tolist())
         industries = ["All"] + sorted(df["industry"].dropna().unique().tolist())
         focuses = ["All"] + sorted(df["focus_area"].dropna().unique().tolist())
+        styles = ["All"] + sorted(df["case_style"].dropna().unique().tolist()) if "case_style" in df else ["All"]
 
         difficulty = c1.selectbox("Difficulty", difficulties)
         industry = c2.selectbox("Industry", industries)
         focus = c3.selectbox("Focus Area", focuses)
+        style = c4.selectbox("Case Style", styles)
 
         # --- Apply filters ---
         if difficulty != "All":
@@ -46,6 +49,9 @@ def render(user):
             df = df[df["industry"] == industry]
         if focus != "All":
             df = df[df["focus_area"] == focus]
+        if style != "All":
+            df = df[df["case_style"] == style]
+
 
         if df.empty:
             st.info("No cases match your filters.")
@@ -80,8 +86,15 @@ def render(user):
         )
         rec_mode_key = "fix_weaknesses" if rec_mode == "Fix Weaknesses" else "build_strengths"
 
+        pref_style = st.radio(
+            "Preferred Case Style",
+            ["Any", "Candidate-led", "Interviewer-led"],
+            horizontal=True,
+        )
+
         # --- Get recommendations ---
-        recs = recommend_cases(user_avgs, mode=rec_mode_key, top_n=5)
+        recs = recommend_cases(user_avgs, mode=rec_mode_key, top_n=5, pref_style=None if pref_style == "Any" else pref_style)
+
 
         if not recs:
             st.warning("No recommendations available.")

@@ -31,14 +31,23 @@ def compute_case_score(user_avgs: dict, case: dict, mode: str):
     return score
 
 @st.cache_data(ttl=600)
-def recommend_cases(user_avgs: dict, mode: str = "fix_weaknesses", top_n: int = 5):
+def recommend_cases(user_avgs: dict, mode: str = "fix_weaknesses", top_n: int = 5, pref_style: str | None = None):
     """Recommend top N cases for the user given their strengths or weaknesses."""
     cases = get_all_cases()
     if not cases:
         return []
 
+    # --- Strict filter by preferred style ---
+    if pref_style:
+        cases = [c for c in cases if c.get("case_style") == pref_style]
+
+    if not cases:
+        return []
+
+    # --- Compute scores and sort ---
     for c in cases:
         c["score"] = compute_case_score(user_avgs, c, mode)
 
     sorted_cases = sorted(cases, key=lambda x: x["score"], reverse=True)
     return sorted_cases[:top_n]
+
