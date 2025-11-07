@@ -90,7 +90,6 @@ def render(user):
             }
 
             for fb in pending:
-                st.markdown("---")
                 from_name = user_map.get(fb["from_user"], fb["from_user"])
                 case_title = case_map.get(fb["case_id"], fb["case_id"])
 
