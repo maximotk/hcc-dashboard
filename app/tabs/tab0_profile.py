@@ -27,10 +27,9 @@ def render(user):
         with colB:
             st.info(prof.get("bio") or "Add a short bio so others can get to know you.")
 
-
-    
-
+    st.write("Before")
     st.divider()
+    st.write("After")
     with st.expander("📅 My Availability (next 2 weeks)", expanded=False):
         prof = get_user_profile(user.id) or {}
         tz_str = prof.get("timezone") or "Europe/Paris"
@@ -93,14 +92,6 @@ def render(user):
                         update_appointment_status(a["id"], "cancelled", user.id); st.rerun()
                 if a.get("notes"):
                     c3.write(a["notes"])
-
-
-
-
-
-
-
-
 
     st.divider()
     with st.expander("✏️ Edit Profile", expanded=False):
