@@ -61,3 +61,19 @@ def get_feedback_for_user(user_id: str, status: str = "accepted"):
 def update_feedback_status(feedback_id: str, status: str):
     """Accept or reject feedback entry."""
     supabase.table("feedback").update({"status": status}).eq("id", feedback_id).execute()
+
+def get_user_profile(user_id: str):
+    """Fetch the full user profile."""
+    res = supabase.table("users").select("*").eq("id", user_id).single().execute()
+    return res.data or {}
+
+def update_my_profile(user_id: str, payload: dict):
+    """Update the current user's profile with validated fields."""
+    allowed_keys = {
+        "name", "language", "experience_level", "firms_applying", "bio",
+        "availability", "timezone", "linkedin_url"
+    }
+    clean = {k: v for k, v in payload.items() if k in allowed_keys}
+    if not clean:
+        return
+    supabase.table("users").update(clean).eq("id", user_id).execute()

@@ -1,6 +1,7 @@
 import streamlit as st
 from app.core.auth import check_session, login_ui, logout_button
 from app.tabs import (
+    tab0_profile,
     tab1_analytics,
     tab2_case_recommendations,
     tab3_partner_recommendations,
@@ -27,6 +28,7 @@ else:
         st.sidebar.success("Data was updated.")
 
     tabs = st.tabs([
+        "👤 Profile",
         "📊 Analytics",
         "💼 Case Recommendations",
         "🤝 Partner Recommendations",
@@ -34,13 +36,16 @@ else:
     ])
 
     with tabs[0]:
-        tab1_analytics.render(user)
+        tab0_profile.render(user)
 
     with tabs[1]:
-        tab2_case_recommendations.render(user)
+        tab1_analytics.render(user)
 
     with tabs[2]:
-        tab3_partner_recommendations.render(user)
+        tab2_case_recommendations.render(user)
 
     with tabs[3]:
+        tab3_partner_recommendations.render(user)
+
+    with tabs[4]:
         tab4_feedback_input.render(user)
