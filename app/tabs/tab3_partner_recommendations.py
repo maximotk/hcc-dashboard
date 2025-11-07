@@ -3,6 +3,10 @@
 import streamlit as st
 import pandas as pd
 from app.core.recommendations_partners import recommend_partners, get_all_users
+from app.core.scheduling import get_bookable_slots_for_host, book_slot
+from app.core.db import get_user_profile
+from zoneinfo import ZoneInfo
+from datetime import datetime
 
 def render(user):
     st.header("👥 Partner Recommendation System")
@@ -12,6 +16,17 @@ def render(user):
         ["🧭 Explore Users", "🤖 Personalized Recommendations"],
         horizontal=True,
     )
+
+    if "book_host" not in st.session_state:
+        st.session_state["book_host"] = None
+
+    # reset book_host when switching modes
+    if "last_mode" not in st.session_state:
+        st.session_state["last_mode"] = mode
+    elif st.session_state["last_mode"] != mode:
+        st.session_state["last_mode"] = mode
+        st.session_state["book_host"] = None
+
 
     # ---------------------------------------------------------------------
     # 1️⃣ EXPLORE USERS
@@ -83,6 +98,37 @@ def render(user):
                     if row.get("linkedin_url"):
                         st.link_button("LinkedIn", row["linkedin_url"])
 
+                    # --- Booking UI for this host (Explore) ---
+                    host_id = row["id"]
+
+                    if st.button("📅 Book session", key=f"book_btn_{host_id}"):
+                        st.session_state["book_host"] = host_id
+
+                    if st.session_state.get("book_host") == host_id:
+                        st.info("Select an available slot below:")
+                        slots = get_bookable_slots_for_host(host_id)
+
+                        # show in my timezone
+                        tz_me = (get_user_profile(user.id) or {}).get("timezone") or "Europe/Paris"
+
+                        if not slots:
+                            st.caption("No open slots.")
+                        else:
+                            for s in slots:
+                                start_local = datetime.fromisoformat(s["start_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_me))
+                                end_local   = datetime.fromisoformat(s["end_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_me))
+                                cc = st.columns([3,2])
+                                cc[0].markdown(f"**{start_local:%a %d %b %H:%M} → {end_local:%H:%M}** ({tz_me})")
+                                if cc[1].button("Request this slot", key=f"req_{s['id']}"):
+                                    appt_id = book_slot(s["id"], host_id=host_id, guest_id=user.id)
+                                    if appt_id:
+                                        st.success("Requested! Host needs to confirm.")
+                                        st.session_state["book_host"] = None
+                                        st.rerun()
+                                    else:
+                                        st.error("Sorry, that slot was just taken. Please pick another.")
+
+
 
     # ---------------------------------------------------------------------
     # 2️⃣ PERSONALIZED RECOMMENDATIONS
@@ -123,4 +169,34 @@ def render(user):
                     st.markdown(f"📧 [Email {title_name}](mailto:{email}?subject=Case%20practice%20partner)")
                 if u.get("linkedin_url"):
                     st.link_button("LinkedIn", u["linkedin_url"])
+
+                # --- Booking UI for this host (Personalized) ---
+                host_id = u["id"]
+
+                if st.button("📅 Book session", key=f"book_btn_rec_{host_id}"):
+                    st.session_state["book_host"] = host_id
+
+                if st.session_state.get("book_host") == host_id:
+                    st.info("Select an available slot below:")
+                    slots = get_bookable_slots_for_host(host_id)
+
+                    tz_me = (get_user_profile(user.id) or {}).get("timezone") or "Europe/Paris"
+
+                    if not slots:
+                        st.caption("No open slots.")
+                    else:
+                        for s in slots:
+                            start_local = datetime.fromisoformat(s["start_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_me))
+                            end_local   = datetime.fromisoformat(s["end_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_me))
+                            cc = st.columns([3,2])
+                            cc[0].markdown(f"**{start_local:%a %d %b %H:%M} → {end_local:%H:%M}** ({tz_me})")
+                            if cc[1].button("Request this slot", key=f"req_rec_{s['id']}"):
+                                appt_id = book_slot(s["id"], host_id=host_id, guest_id=user.id)
+                                if appt_id:
+                                    st.success("Requested! Host needs to confirm.")
+                                    st.session_state["book_host"] = None
+                                    st.rerun()
+                                else:
+                                    st.error("Sorry, that slot was just taken. Please pick another.")
+
 
