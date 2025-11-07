@@ -8,12 +8,14 @@ import streamlit as st
 
 @st.cache_data(ttl=600)
 def get_all_users(exclude_user_id=None):
-    """Fetch all users from Supabase, optionally excluding the current one."""
-    res = supabase.table("users").select("id, name, email, language, created_at").execute()
+    res = supabase.table("users").select(
+        "id, name, email, language, experience_level, firms_applying, bio, availability, timezone, linkedin_url, created_at"
+    ).execute()
     users = res.data or []
     if exclude_user_id:
         users = [u for u in users if u["id"] != exclude_user_id]
     return users
+
 
 
 def get_user_case_count(user_id):
