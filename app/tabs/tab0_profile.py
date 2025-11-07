@@ -27,73 +27,71 @@ def render(user):
         with colB:
             st.info(prof.get("bio") or "Add a short bio so others can get to know you.")
 
-    st.write("Before")
-    st.divider()
-    st.write("After")
-    with st.expander("📅 My Availability (next 2 weeks)", expanded=False):
-        prof = get_user_profile(user.id) or {}
-        tz_str = prof.get("timezone") or "Europe/Paris"
+    with st.container():
+        st.subheader("Calendar")
+        with st.expander("📅 My Availability (next 2 weeks)", expanded=False):
+            prof = get_user_profile(user.id) or {}
+            tz_str = prof.get("timezone") or "Europe/Paris"
 
-        # 1) Create slots
-        st.caption(f"Times shown in your timezone: **{tz_str}**")
-        col1, col2 = st.columns(2)
-        days = col1.multiselect(
-            "Pick dates (next 14 days)",
-            [date.today() + timedelta(days=i) for i in range(0, 14)],
-            []
-        )
-        start_times = col2.multiselect(
-            "Pick start times",
-            [time(h, m) for h in range(7, 22) for m in (0,30)],
-            []
-        )
-        if st.button("➕ Add 90-min slots"):
-            starts_local = [datetime.combine(d, t) for d in days for t in start_times]
-            if starts_local:
-                add_slots(user.id, starts_local, tz_str)
-                st.success(f"Added {len(starts_local)} slot(s).")
-                st.rerun()
-            else:
-                st.info("Select at least one date and time.")
-
-        # 2) List & delete my slots
-        st.write("### Open Slots")
-        slots = get_slots_for_user(user.id, include_booked=False)
-        if not slots:
-            st.caption("No open slots.")
-        else:
-            for s in slots:
-                start_local = datetime.fromisoformat(s["start_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
-                end_local   = datetime.fromisoformat(s["end_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
-                cols = st.columns([3,1])
-                cols[0].markdown(f"**{start_local:%a %d %b %H:%M} → {end_local:%H:%M}**")
-                if cols[1].button("🗑️ Delete", key=f"del_{s['id']}"):
-                    delete_slot(s["id"], user.id)
+            # 1) Create slots
+            st.caption(f"Times shown in your timezone: **{tz_str}**")
+            col1, col2 = st.columns(2)
+            days = col1.multiselect(
+                "Pick dates (next 14 days)",
+                [date.today() + timedelta(days=i) for i in range(0, 14)],
+                []
+            )
+            start_times = col2.multiselect(
+                "Pick start times",
+                [time(h, m) for h in range(7, 22) for m in (0,30)],
+                []
+            )
+            if st.button("➕ Add 90-min slots"):
+                starts_local = [datetime.combine(d, t) for d in days for t in start_times]
+                if starts_local:
+                    add_slots(user.id, starts_local, tz_str)
+                    st.success(f"Added {len(starts_local)} slot(s).")
                     st.rerun()
+                else:
+                    st.info("Select at least one date and time.")
 
-    with st.expander("📔 My Appointments", expanded=False):
-        tz_str = (get_user_profile(user.id) or {}).get("timezone") or "Europe/Paris"
-        appts = list_my_appointments(user.id)
-        if not appts:
-            st.caption("No appointments yet.")
-        else:
-            for a in appts:
-                slot = a["availability_slots"]
-                start_local = datetime.fromisoformat(slot["start_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
-                end_local   = datetime.fromisoformat(slot["end_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
-                who = "Host" if a["host_id"] == user.id else "Guest"
-                st.markdown(f"**{start_local:%a %d %b %H:%M} → {end_local:%H:%M}** · _{who}_ · **{a['status']}**")
-                c1, c2, c3 = st.columns(3)
-                if a["host_id"] == user.id and a["status"] == "pending":
-                    if c1.button("✅ Confirm", key=f"c_{a['id']}"):
-                        update_appointment_status(a["id"], "confirmed", user.id); st.rerun()
-                if a["status"] in ("pending","confirmed"):
-                    if c2.button("❌ Cancel", key=f"x_{a['id']}"):
-                        update_appointment_status(a["id"], "cancelled", user.id); st.rerun()
-                if a.get("notes"):
-                    c3.write(a["notes"])
+            # 2) List & delete my slots
+            st.write("### Open Slots")
+            slots = get_slots_for_user(user.id, include_booked=False)
+            if not slots:
+                st.caption("No open slots.")
+            else:
+                for s in slots:
+                    start_local = datetime.fromisoformat(s["start_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
+                    end_local   = datetime.fromisoformat(s["end_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
+                    cols = st.columns([3,1])
+                    cols[0].markdown(f"**{start_local:%a %d %b %H:%M} → {end_local:%H:%M}**")
+                    if cols[1].button("🗑️ Delete", key=f"del_{s['id']}"):
+                        delete_slot(s["id"], user.id)
+                        st.rerun()
 
-    st.divider()
+        with st.expander("📔 My Appointments", expanded=False):
+            tz_str = (get_user_profile(user.id) or {}).get("timezone") or "Europe/Paris"
+            appts = list_my_appointments(user.id)
+            if not appts:
+                st.caption("No appointments yet.")
+            else:
+                for a in appts:
+                    slot = a["availability_slots"]
+                    start_local = datetime.fromisoformat(slot["start_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
+                    end_local   = datetime.fromisoformat(slot["end_ts"].replace("Z","+00:00")).astimezone(ZoneInfo(tz_str))
+                    who = "Host" if a["host_id"] == user.id else "Guest"
+                    st.markdown(f"**{start_local:%a %d %b %H:%M} → {end_local:%H:%M}** · _{who}_ · **{a['status']}**")
+                    c1, c2, c3 = st.columns(3)
+                    if a["host_id"] == user.id and a["status"] == "pending":
+                        if c1.button("✅ Confirm", key=f"c_{a['id']}"):
+                            update_appointment_status(a["id"], "confirmed", user.id); st.rerun()
+                    if a["status"] in ("pending","confirmed"):
+                        if c2.button("❌ Cancel", key=f"x_{a['id']}"):
+                            update_appointment_status(a["id"], "cancelled", user.id); st.rerun()
+                    if a.get("notes"):
+                        c3.write(a["notes"])
+
     with st.expander("✏️ Edit Profile", expanded=False):
         with st.form("profile_form"):
             col1, col2 = st.columns(2)
